@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_USER=post_api_user
       - POSTGRES_PASSWORD=postapi
-      - POSTGRES_DB=post_pi
+      - POSTGRES_DB=post_api
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
