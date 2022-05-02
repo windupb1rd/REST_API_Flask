@@ -1,12 +1,24 @@
 from flask import Flask, request, jsonify, abort
-import requests
+import requests, datetime
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 
 app = Flask(__name__)
+db = SQLAlchemy(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://post_api_user:postapi@localhost:5432/post_api'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-@app.route('/')
-def index():
-    return "Hello, World!"
+class Questions(db.Model):
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer , primary_key=True , autoincrement=True)
+    question_id = db.Column(db.String(1000), nullable=False)
+    question_text = db.Column(db.String(1000), nullable=False)
+    answer = db.Column(db.String(1000), nullable=False)
+    creation_date = db.Column(db.DateTime(), nullable=False)
+
+    def __repr__(self):
+        return self.question_id
 
 
 @app.route('/api/questions', methods=['POST'])
@@ -15,14 +27,22 @@ def get_question():
         questions_num = request.json['questions_num']
         response_from_api = requests.get(f'https://jservice.io/api/random?count={questions_num}').json()
 
-        res = {}
-        for index, question in enumerate(response_from_api):
-            res[index] = question
+        # response_data = {}
+        for question in response_from_api:
+            db.session.add(Questions(question_id=question['id'],
+                                     question_text=question['question'],
+                                     answer=question['answer'],
+                                     creation_date=question['created_at']))
+
+        db.session.commit()
+        result = Questions.query.order_by(desc('id')).filter_by(id=3)
+        print(result)
+        # result = {}
 
     else:
         abort(400)
 
-    return res
+    return {}
 
 
 if __name__ == '__main__':
