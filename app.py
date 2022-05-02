@@ -1,12 +1,17 @@
 from flask import Flask, request, jsonify, abort
 import requests, datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import desc
+from sqlalchemy import desc, create_engine
+from sqlalchemy_utils import database_exists, create_database
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'False'
+engine = create_engine('postgresql://post_api_user:postapi@localhost:5432/post_api')
+if not database_exists(engine.url):
+    create_database(engine.url)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://post_api_user:postapi@localhost:5432/post_api'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 
 class Questions(db.Model):

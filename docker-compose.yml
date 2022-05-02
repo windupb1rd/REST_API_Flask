@@ -1,0 +1,16 @@
+version: "3.10"
+
+services:
+  db:
+    image: postgres:13.6-alpine
+    environment:
+      - POSTGRES_USER=post_api_user
+      - POSTGRES_PASSWORD=postapi
+      - POSTGRES_DB=post_pi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "7432:5432"
+
+volumes:
+  postgres_data:
