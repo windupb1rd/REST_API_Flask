@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy import inspect, desc, create_engine
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, jsonify, abort
@@ -25,6 +27,9 @@ class Questions(db.Model):
     creation_date = db.Column(db.DateTime(), nullable=False)
 
     def obj_to_json(self):
+        """
+        Метод приводит атрибуты экземпляра к json
+        """
         dictionary = {
             'question_id': self.question_id,
             'question_text': self.question_text,
@@ -43,11 +48,17 @@ if not inspect(engine).has_table('questions'):
 def get_question():
 
     def get_question_from_api(questions_num: int) -> dict:
+        """
+        Запрос вопросов с API
+        """
 
         return requests.get(f'https://jservice.io/api/random?count={questions_num}').json()
 
-    def check_if_question_exists_and_get_new_one(question: object) -> object:
-        if question in list_of_existing_questions_ids:
+    def check_if_question_exists_and_get_new_one(question: dict) -> dict:
+        """
+        Проверка существования данного вопроса в БД. Если дубль находится, то запрашивается новый вопрос с API
+        """
+        if question['id'] in list_of_existing_questions_ids:
             question = get_question_from_api(1)
             return check_if_question_exists_and_get_new_one(question)
 
@@ -68,12 +79,12 @@ def get_question():
         list_of_existing_questions_ids = [question_id for tup in questions_ids for question_id in tup]
 
         for question in response_from_api:
-            check_if_question_exists_and_get_new_one(question['id'])  # проверка каждого вопроса из выборки на наличие в БД
+            checked_question = check_if_question_exists_and_get_new_one(question)  # проверка каждого вопроса из выборки на наличие в БД
 
-            db.session.add(Questions(question_id=question['id'],
-                                     question_text=question['question'],
-                                     answer=question['answer'],
-                                     creation_date=question['created_at']))
+            db.session.add(Questions(question_id=checked_question['id'],
+                                     question_text=checked_question['question'],
+                                     answer=checked_question['answer'],
+                                     creation_date=checked_question['created_at']))
 
         db.session.commit()
 
