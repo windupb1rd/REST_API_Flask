@@ -24,6 +24,14 @@ https://docs.docker.com/compose/install/
  База данных и таблица создадутся автоматически при первом запуске веб-сервера
 
 
+5. Данные для подключения к БД:
+host: localhost
+port: 7432
+database: post_api
+username: post_api_user
+password: postapi
+
+
 5. Для проверки использовать следующую команду:
 curl -i -H "Content-Type: application/json" -X POST http://localhost:5000/api/questions -d '{"questions_num":1}'
 
