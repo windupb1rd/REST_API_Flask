@@ -64,7 +64,7 @@ def get_question():
 
         return question
 
-    if request.json and 'questions_num' in request.json:
+    if request.json and 'questions_num' in request.json and isinstance(request.json['questions_num'], int):
         previous_entry = Questions.query.order_by(desc('id')).first()
 
         if previous_entry is None:
